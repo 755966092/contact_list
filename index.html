@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"><meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>title</title>
+   <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .list {
+            background-color: #fff;
+        }
+        .list .item {
+            font-size: 0;
+            height: 1rem;
+            box-sizing: border-box;
+            padding: 0 .3rem 0 .3rem;
+            overflow: hidden;
+            border-bottom: .01rem solid #f7f7f7;
+        }
+        .list .item img {
+            margin-right: .1rem;
+            margin-left: .1rem;
+            width: .64rem;
+            height: .64rem;
+        }
+        .list .item .title {
+            width: 5rem;
+        }
+        .list .item .title .name {
+            font-size: .28rem;
+            white-space:nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .list .item .title .position {
+            font-size: .24rem;
+            white-space:nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+        }
+        .slidePage {
+            width: .6rem;
+            text-align: right;
+            /*background-color: rgba(255,0,0,.5);*/
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            font-size: .24rem;
+            box-sizing: border-box;
+            padding-right: .1rem;
+        }
+        .slidePage div {
+            width: .2rem;
+        }
+        .slidePage a{
+            display: inline-block;
+             width: .2rem;
+            text-align: center;
+            color: #555;
+        }
+        .groupTitle {
+            font-size: .24rem;
+            padding: .1rem .3rem;
+            background-color: #F0F0F6;
+        }
+        .letter {
+            width: 1rem;
+            height: 1rem;
+            line-height: 1rem;
+            text-align: center;
+            background-color: rgba(0,0,0,0.3);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            border-radius: 50%;
+            font-size: .4rem;
+            color: #fff;
+            opacity: 0;
+        }
+        /* flex类名 */
+        /* 定义 */
+        .flex-def { display: -webkit-box;  display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex;}
+        /* 主轴居中 */
+        .flex-zCenter { -webkit-box-pack: center; -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
+        /* 主轴两端对齐 */
+        .flex-zBetween { -webkit-box-pack: justify; -moz-justify-content: space-between; -webkit-justify-content: space-between; justify-content: space-between; }
+        /* 主轴end对齐 */
+        .flex-zEnd { -webkit-box-pack: end; -moz-justify-content: flex-end; -webkit-justify-content: flex-end; justify-content: flex-end; }
+        /* 主轴start对齐 */
+        .flex-zStart { -webkit-box-pack: start; -moz-justify-content: start; -webkit-justify-content: start; justify-content: start; }
+
+        /* 侧轴居中 */
+        .flex-cCenter { -webkit-box-align: center; -moz-align-items: center; -webkit-align-items: center; align-items: center; }
+        /* 侧轴start对齐 */
+        .flex-cStart { -webkit-box-align: start; -moz-align-items: start; -webkit-align-items: start; align-items: start; }
+        /* 侧轴底部对齐 */
+        .flex-cEnd { -webkit-box-align: end; -moz-align-items: flex-end; -webkit-align-items: flex-end; align-items: flex-end; }
+        /* 侧轴文本基线对齐 */
+        .flex-cBaseline { -webkit-box-align: baseline; -moz-align-items: baseline; -webkit-align-items: baseline; align-items: baseline; }
+        /* 侧轴上下对齐并铺满 */
+        .flex-cStretch { -webkit-box-align: stretch; -moz-align-items: stretch; -webkit-align-items: stretch; align-items: stretch; }
+
+        /* 主轴从上到下 */
+        .flex-zTopBottom { -webkit-box-direction: normal; -webkit-box-orient: vertical; -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column; }
+        /* 主轴从下到上 */
+        .flex-zBottomTop { -webkit-box-pack: end; -webkit-box-direction: reverse; -webkit-box-orient: vertical; -moz-flex-direction: column-reverse; -webkit-flex-direction: column-reverse; flex-direction: column-reverse; }
+        /* 主轴从左到右 */
+        .flex-zLeftRight { -webkit-box-direction: normal; -webkit-box-orient: horizontal; -moz-flex-direction: row; -webkit-flex-direction: row; flex-direction: row; }
+        /* 主轴从右到左 */
+        .flex-zRightLeft { -webkit-box-pack: end; -webkit-box-direction: reverse; -webkit-box-orient: horizontal; -moz-flex-direction: row-reverse; -webkit-flex-direction: row-reverse; flex-direction: row-reverse; }
+
+        /* 是否允许子元素伸缩 */
+        .flex-item { -webkit-box-flex: 1.0; -moz-flex-grow: 1; -webkit-flex-grow: 1; flex-grow: 1; }
+   </style>
+</head>
+<body>
+    <div class="main">
+        <div class=" list resultList"></div>
+        <script type="text/x-dot-template" id="listT">
+        {{ for (var i = 0; i < it.length; i++) { }} 
+            {{?it[i].flagLetter}}
+                <p id="{{=it[i].flagLetter}}" class="groupTitle">{{=it[i].flagLetter}}</p>
+            {{? }}
+            <div class="item flex-def flex-cCenter" tapmode onclick="clickInfo(this)">
+                <img src="{{=it[i].headUrl}}">
+                <div class="title">
+                    <h3 class="name">{{=it[i].name}}</h3>
+                    <p class="position">{{=it[i].position==null ? '' : it[i].position}}</p>
+                </div>
+            </div>
+        {{ }; }}
+        </script>
+    </div>
+    <div class="slidePage flex-def flex-zTopBottom flex-zCenter flex-cEnd" ontouchend="touchEnd()"  ontouchmove="move()">
+        <div class="wrap"></div>
+    </div>
+    <div class="letter"></div>
+</body>
+<script type="text/javascript" src="./doT.min.js"></script>
+<script type="text/javascript" src="./jquery.min.js"></script>
+<script type="text/javascript">
+    //rem转换
+    (function(doc, win) {
+        var docEl = doc.documentElement,
+            resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+            recalc = function() {
+                var clientWidth = docEl.clientWidth;
+                if (!clientWidth) return;
+                docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+            };
+
+        if (!doc.addEventListener) return;
+        win.addEventListener(resizeEvt, recalc, false);
+        doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+    // 数据源
+    var data = [
+        {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'E',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'F',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'B',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'D',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'W',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Q',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'R',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'X',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'T',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Y',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'U',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'I',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'O',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'P',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+        {
+            flag: 'Z',
+            name: 'name3',
+            position: '科技公司',
+            headUrl: './images/tx_5.jpg'
+        },{
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'E',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'F',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'B',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'D',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'W',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Q',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'R',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'X',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'T',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Y',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'U',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'I',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'O',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'P',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+        {
+            flag: 'Z',
+            name: 'name3',
+            position: '科技公司',
+            headUrl: './images/tx_5.jpg'
+        },{
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'E',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'F',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'B',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'D',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'W',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Q',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'R',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'X',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'T',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Y',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'U',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'I',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'O',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'P',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+        {
+            flag: 'Z',
+            name: 'name3',
+            position: '科技公司',
+            headUrl: './images/tx_5.jpg'
+        },{
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'E',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'F',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'B',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'D',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'W',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Q',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'R',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'X',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'T',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Y',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'U',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'I',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'O',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'P',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+        {
+            flag: 'Z',
+            name: 'name3',
+            position: '科技公司',
+            headUrl: './images/tx_5.jpg'
+        },{
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'E',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'F',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'B',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'D',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'W',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Q',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'R',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'X',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'T',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Y',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'U',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'I',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'O',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'P',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+        {
+            flag: 'Z',
+            name: 'name3',
+            position: '科技公司',
+            headUrl: './images/tx_5.jpg'
+        },{
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'E',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'F',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'B',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'A',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'D',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'W',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Q',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'R',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'X',
+            name: 'name5',
+            position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'T',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'Y',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+         {
+            flag: 'U',
+            name: 'name1',
+            position: '科技公司',
+            headUrl: './images/tx_1.jpg'
+        },
+        {
+            flag: 'I',
+            name: 'name5',
+            // position: '科技公司',
+            headUrl: './images/tx_3.jpg'
+        },
+        {
+            flag: 'O',
+            name: 'name6',
+            position: '科技公司',
+            headUrl: './images/tx_2.jpg'
+        },
+        {
+            flag: 'P',
+            name: 'name2',
+            position: '科技公司',
+            headUrl: './images/tx_4.jpg'
+        },
+        {
+            flag: 'Z',
+            name: 'name3',
+            position: '科技公司',
+            headUrl: './images/tx_5.jpg'
+        },
+    ]
+    // 点击事件
+    function clickInfo(ele) {
+        alert($(ele).find('.name').text())
+    }
+    // 判断是否是字母
+    function f_check_uppercase(obj) {
+       if (/[A-Z]/.test(obj))    {   
+          return true;   
+       }    
+       return false;   
+    }
+    // 数据排序
+    function sortData(data) {
+        var letterArr = [];
+        for (var i = 0; i < data.length; i++) {
+            for (var j = 0; j < data.length; j++) {
+                if (data[i].flag < data[j].flag) {
+                    var temp = data[i];
+                    data[i] = data[j];
+                    data[j] = temp;
+                }
+            }
+         }
+         if (f_check_uppercase(data[0].flag)) {
+            letterArr.push(data[0].flag)
+         } else {
+            letterArr.push('#')
+         }
+        for (var i = 0; i < data.length; i++) {
+            if(f_check_uppercase(data[0].flag)) {
+                data[0].flagLetter = data[0].flag
+            } else {
+                data[0].flagLetter = '#'
+            }
+            if (i>0) {
+                if (data[i].flag !== data[i-1].flag) {
+                    if (f_check_uppercase(data[i].flag)) {
+                        data[i].flagLetter = data[i].flag;
+                        letterArr.push(data[i].flag)
+                    } else {
+                        data[i].flagLetter = '#';
+                        letterArr.push('#')
+                    }
+                }
+            }
+         }
+         // 侧边栏
+         var str = '' ;
+         for (var i = 0; i < letterArr.length; i++) {
+            str += '<a ontouchstart="anchorJump(this)"  >'+ letterArr[i] +'</a>'
+         }
+         $('.slidePage div').html(str)
+         $('.resultList').html(doT.template($('#listT').text())(data))
+    }
+    // 跳转锚点
+    function anchorJump(n) {
+        var text = $(n).text();
+        if (text.length < 2) {
+            $('.letter').text(text)
+            $('.letter').css({'opacity':' 1'})
+            location.hash = '#' + text
+        }
+    }
+    // 滑动结束
+    function touchEnd() {
+        var opcityNum = 1;
+        setInterval(function () {
+            opcityNum -= 0.1;
+            if (opcityNum > 0) {
+                $('.letter').css({'opacity': opcityNum})
+            } else {
+                clearInterval();
+            }
+        },50)
+    }
+    // 手指滑动
+    function move() {
+       //  获取开始点击的位置
+       //  每滑动一个a标签的高度切换一个锚点
+        event.preventDefault();
+        anchorJump(document.elementFromPoint(event.changedTouches[0].clientX,event.changedTouches[0].clientY))
+    }
+    sortData(data)
+</script>
+</html>
